@@ -3,7 +3,7 @@ import os
 def create_m3u_playlists(folder_path):
     files = [file for file in os.listdir(folder_path) if (file.endswith('.chd') or file.endswith('.cue')) and '(Disc' in file]
 
-    path_prefix = input("Please type the path prefix you'll like to add or press Enter for no prefix: ").strip()
+    path_prefix = input("Enter the path prefix (press Enter for no prefix): ").strip()
 
     name_groups = {}
     for file in files:
@@ -38,9 +38,10 @@ def get_base_name_and_region(file_name):
 
 def create_m3u_playlist(file_paths, base_name, region_info, path_prefix):
     m3u_name = f'{base_name} {region_info}'.strip() if region_info else base_name
+    lines = [path_prefix + os.path.basename(path) for path in file_paths]
+
     with open(m3u_name + '.m3u', 'w') as playlist_file:
-        for path in file_paths:
-            playlist_file.write(path_prefix + os.path.basename(path) + '\n')
+        playlist_file.write('\n'.join(lines))
 
 # Get the current script's directory
 script_directory = os.path.dirname(os.path.realpath(__file__))
