@@ -23,7 +23,7 @@ foreach ($line in $iniContent) {
     }
     elseif ($appName -and $line -match "1\\apps\\(\d+)\\id=(\d+)") {
         $appId = $Matches[2]
-        $moonlightContent = "# Daijishou Player Template`r`n[moonlight_id] $appId"
+        $moonlightContent = "# Daijishou Player Template`r`n[moonlight_id] $appId`r`n..."
         $fileName = "$appName.moonlight"
         $fileName = $fileName -replace '[\\\/:*?"<>|]', '' # Remove illegal characters for file names
         $filePath = Join-Path $newDirPath $fileName
