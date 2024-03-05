@@ -1,4 +1,21 @@
 import os
+import json
+
+def save_profile(profile_name, prefix):
+    profiles = {}
+    if os.path.exists("profiles.json"):
+        with open("profiles.json", "r") as file:
+            profiles = json.load(file)
+    profiles[profile_name] = prefix
+    with open("profiles.json", "w") as file:
+        json.dump(profiles, file)
+
+def load_profile(profile_name):
+    profiles = {}
+    if os.path.exists("profiles.json"):
+        with open("profiles.json", "r") as file:
+            profiles = json.load(file)
+    return profiles.get(profile_name, "")
 
 def generate_m3u(directory):
     files_by_base = {}
@@ -26,7 +43,22 @@ def generate_m3u(directory):
 
             files_by_base[base_name].add(filename)
 
-    prefix = input("Enter prefix to add to the beginning of each line (press enter for no prefix): ")
+    prefix_choice = input("Type 1 to manually enter prefix\nType 2 to enter a prefix and save as profile\nType 3 and profile name to use profile prefix\nType 4 to not include prefix:\n")
+
+    prefix = ""
+    if prefix_choice == "1":
+        prefix = input("Enter prefix to add to the beginning of each line: ")
+        profile_name = input("Enter a name for this profile: ")
+        save_profile(profile_name, prefix)
+    elif prefix_choice == "2":
+        prefix = input("Enter prefix to add to the beginning of each line: ")
+        profile_name = input("Enter a name for this profile: ")
+        save_profile(profile_name, prefix)
+    elif prefix_choice.startswith("3 "):
+        profile_name = prefix_choice[2:]
+        prefix = load_profile(profile_name)
+    elif prefix_choice == "4":
+        prefix = ""
 
     created_files = []
 
