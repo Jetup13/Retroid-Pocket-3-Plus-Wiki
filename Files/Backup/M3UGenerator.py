@@ -48,8 +48,6 @@ def generate_m3u(directory):
     prefix = ""
     if prefix_choice == "1":
         prefix = input("Enter prefix to add to the beginning of each line: ")
-        profile_name = input("Enter a name for this profile: ")
-        save_profile(profile_name, prefix)
     elif prefix_choice == "2":
         prefix = input("Enter prefix to add to the beginning of each line: ")
         profile_name = input("Enter a name for this profile: ")
