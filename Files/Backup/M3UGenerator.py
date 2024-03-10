@@ -1,5 +1,6 @@
 import os
 import json
+import shutil
 
 def save_profile(profile_name, prefix):
     profiles = {}
@@ -43,7 +44,7 @@ def generate_m3u(directory):
 
             files_by_base[base_name].add(filename)
 
-    prefix_choice = input("Type 1 to manually enter prefix\nType 2 to enter a prefix and save as profile\nType 3 and profile name to use profile prefix\nType 4 to not include prefix:\n")
+    prefix_choice = input("Type 1 to manually enter prefix\nType 2 to enter a prefix and save as profile\nType 3 and profile name to use profile prefix\nType 4 to not include prefix\nType 5 to move files into separate directories based on M3U names:\n")
 
     prefix = ""
     if prefix_choice == "1":
@@ -57,13 +58,31 @@ def generate_m3u(directory):
         prefix = load_profile(profile_name)
     elif prefix_choice == "4":
         prefix = ""
+    elif prefix_choice == "5":
+        for base_name, filenames in files_by_base.items():
+            m3u_name = f"{base_name}.m3u"
+            folder_name = f"{base_name}.m3u"  # Append .m3u to folder name
+            os.makedirs(folder_name, exist_ok=True)
+            for filename in filenames:
+                if filename.endswith('.bin'):
+                    shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
+                else:
+                    shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
+            with open(os.path.join(folder_name, m3u_name), 'w') as m3u_file:
+                lines = [filename for filename in sorted(filenames) if not filename.endswith('.bin')]
+                lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
+                if lines:  # Only create M3U file if there are non-empty lines
+                    m3u_file.write("\n".join(lines))
+        print("Files moved into separate directories based on M3U names.")
+        input("Press Enter to close the dialog.")
+        return
 
     created_files = []
 
     for base_name, filenames in files_by_base.items():
         m3u_name = f"{base_name}.m3u"
         with open(m3u_name, 'w') as m3u_file:
-            lines = [prefix + filename for filename in sorted(filenames)]
+            lines = [prefix + filename for filename in sorted(filenames) if not filename.endswith('.bin')]
             lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
             if lines:  # Only create M3U file if there are non-empty lines
                 m3u_file.write("\n".join(lines))
