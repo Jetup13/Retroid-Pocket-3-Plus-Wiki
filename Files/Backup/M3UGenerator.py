@@ -44,20 +44,20 @@ def generate_m3u(directory):
 
             files_by_base[base_name].add(filename)
 
-    prefix_choice = input("Type 1 to manually enter prefix\nType 2 to enter a prefix and save as profile\nType 3 and profile name to use profile prefix\nType 4 to not include prefix\nType 5 to move files into separate directories based on M3U names:\n")
+    prefix_choice = input("Type 1 to not include prefix\nType 2 to manually enter prefix\nType 3 to enter a prefix and save as profile\nType 4 and profile name to use profile prefix\nType 5 to move files into separate directories based on M3U names:\n")
 
     prefix = ""
     if prefix_choice == "1":
-        prefix = input("Enter prefix to add to the beginning of each line: ")
+        prefix = ""
     elif prefix_choice == "2":
+        prefix = input("Enter prefix to add to the beginning of each line: ")
+    elif prefix_choice == "3":
         prefix = input("Enter prefix to add to the beginning of each line: ")
         profile_name = input("Enter a name for this profile: ")
         save_profile(profile_name, prefix)
-    elif prefix_choice.startswith("3 "):
+    elif prefix_choice.startswith("4 "):
         profile_name = prefix_choice[2:]
         prefix = load_profile(profile_name)
-    elif prefix_choice == "4":
-        prefix = ""
     elif prefix_choice == "5":
         for base_name, filenames in files_by_base.items():
             m3u_name = f"{base_name}.m3u"
