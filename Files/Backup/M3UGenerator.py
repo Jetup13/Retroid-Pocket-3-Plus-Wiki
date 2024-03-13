@@ -68,7 +68,7 @@ def generate_m3u(directory):
                     shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
                 else:
                     shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
-            with open(os.path.join(folder_name, m3u_name), 'w') as m3u_file:
+            with open(os.path.join(folder_name, m3u_name), 'w', newline='\n') as m3u_file:
                 lines = [filename for filename in sorted(filenames) if not filename.endswith('.bin')]
                 lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
                 if lines:  # Only create M3U file if there are non-empty lines
@@ -81,7 +81,7 @@ def generate_m3u(directory):
 
     for base_name, filenames in files_by_base.items():
         m3u_name = f"{base_name}.m3u"
-        with open(m3u_name, 'w') as m3u_file:
+        with open(m3u_name, 'w', newline='\n') as m3u_file:
             lines = [prefix + filename for filename in sorted(filenames) if not filename.endswith('.bin')]
             lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
             if lines:  # Only create M3U file if there are non-empty lines
