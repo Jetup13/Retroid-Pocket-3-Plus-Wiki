@@ -12,11 +12,24 @@ def save_profile(profile_name, prefix):
         json.dump(profiles, file)
 
 def load_profile(profile_name):
-    profiles = {}
-    if os.path.exists("profiles.json"):
-        with open("profiles.json", "r") as file:
-            profiles = json.load(file)
+    with open("profiles.json", "r") as file:
+        profiles = json.load(file)
     return profiles.get(profile_name, "")
+
+def move_files_and_generate_m3u(directory, files_by_base, prefix=""):
+    for base_name, filenames in files_by_base.items():
+        m3u_name = f"{base_name}.m3u"
+        folder_name = f"{base_name}.m3u"  # Append .m3u to folder name
+        os.makedirs(folder_name, exist_ok=True)
+        for filename in filenames:
+            shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
+        with open(os.path.join(folder_name, m3u_name), 'w', newline='\n') as m3u_file:
+            lines = [prefix + filename for filename in sorted(filenames) if not filename.endswith('.bin')]
+            lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
+            if lines:  # Only create M3U file if there are non-empty lines
+                m3u_file.write("\n".join(lines))
+    print("Files moved into separate directories based on M3U names.")
+    input("Press Enter to close the dialog.")
 
 def generate_m3u(directory):
     files_by_base = {}
@@ -46,56 +59,45 @@ def generate_m3u(directory):
 
     prefix_choice = input("Type 1 to not include prefix\nType 2 to manually enter prefix\nType 3 to enter a prefix and save as profile\nType 4 and profile name to use profile prefix\nType 5 to move files into separate directories based on M3U names:\n")
 
-    prefix = ""
     if prefix_choice == "1":
         prefix = ""
+        move_files = False
     elif prefix_choice == "2":
         prefix = input("Enter prefix to add to the beginning of each line: ")
+        move_files = False
     elif prefix_choice == "3":
         prefix = input("Enter prefix to add to the beginning of each line: ")
         profile_name = input("Enter a name for this profile: ")
         save_profile(profile_name, prefix)
+        move_files = False
     elif prefix_choice.startswith("4 "):
         profile_name = prefix_choice[2:]
         prefix = load_profile(profile_name)
+        move_files = False
     elif prefix_choice == "5":
+        prefix = input("Enter prefix to add to the beginning of each line: ")
+        move_files = True
+    else:
+        prefix = ""
+        move_files = False
+
+    if move_files:
+        move_files_and_generate_m3u(directory, files_by_base, prefix)
+    else:
         for base_name, filenames in files_by_base.items():
             m3u_name = f"{base_name}.m3u"
-            folder_name = f"{base_name}.m3u"  # Append .m3u to folder name
-            os.makedirs(folder_name, exist_ok=True)
-            for filename in filenames:
-                if filename.endswith('.bin'):
-                    shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
-                else:
-                    shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
-            with open(os.path.join(folder_name, m3u_name), 'w', newline='\n') as m3u_file:
+            with open(m3u_name, 'w', newline='\n') as m3u_file:
                 lines = [filename for filename in sorted(filenames) if not filename.endswith('.bin')]
+                lines = [prefix + line for line in lines]  # Add prefix to each line
                 lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
                 if lines:  # Only create M3U file if there are non-empty lines
                     m3u_file.write("\n".join(lines))
-        print("Files moved into separate directories based on M3U names.")
-        input("Press Enter to close the dialog.")
-        return
 
-    created_files = []
-
-    for base_name, filenames in files_by_base.items():
-        m3u_name = f"{base_name}.m3u"
-        with open(m3u_name, 'w', newline='\n') as m3u_file:
-            lines = [prefix + filename for filename in sorted(filenames) if not filename.endswith('.bin')]
-            lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
-            if lines:  # Only create M3U file if there are non-empty lines
-                m3u_file.write("\n".join(lines))
-                created_files.append(m3u_name)
-
-    if created_files:
         print("Files created:")
-        for created_file in created_files:
-            print(created_file)
-    else:
-        print("No files matching the criteria found.")
+        for base_name in files_by_base.keys():
+            print(f"{base_name}.m3u")
 
-    input("Press Enter to close the dialog.")
+        input("Press Enter to close the dialog.")
 
 # Get the directory of the script
 script_directory = os.path.dirname(os.path.abspath(__file__))
