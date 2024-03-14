@@ -16,7 +16,7 @@ def load_profile(profile_name):
         profiles = json.load(file)
     return profiles.get(profile_name, "")
 
-def move_files_and_generate_m3u(directory, files_by_base, prefix=""):
+def move_files_and_generate_m3u(directory, files_by_base, prefix="", add_folder_name=False):
     for base_name, filenames in files_by_base.items():
         m3u_name = f"{base_name}.m3u"
         folder_name = f"{base_name}.m3u"  # Append .m3u to folder name
@@ -24,7 +24,15 @@ def move_files_and_generate_m3u(directory, files_by_base, prefix=""):
         for filename in filenames:
             shutil.move(os.path.join(directory, filename), os.path.join(folder_name, filename))
         with open(os.path.join(folder_name, m3u_name), 'w', newline='\n') as m3u_file:
-            lines = [prefix + filename for filename in sorted(filenames) if not filename.endswith('.bin')]
+            lines = []
+            for filename in sorted(filenames):
+                if filename.endswith('.bin'):
+                    continue
+                line = prefix
+                if add_folder_name:
+                    line += f"{base_name}.m3u/"
+                line += filename
+                lines.append(line)
             lines = [line.strip() for line in lines if line.strip()]  # Remove empty lines
             if lines:  # Only create M3U file if there are non-empty lines
                 m3u_file.write("\n".join(lines))
@@ -62,27 +70,34 @@ def generate_m3u(directory):
     if prefix_choice == "1":
         prefix = ""
         move_files = False
+        add_folder_name = False
     elif prefix_choice == "2":
         prefix = input("Enter prefix to add to the beginning of each line: ")
         move_files = False
+        add_folder_name = False
     elif prefix_choice == "3":
         prefix = input("Enter prefix to add to the beginning of each line: ")
         profile_name = input("Enter a name for this profile: ")
         save_profile(profile_name, prefix)
         move_files = False
+        add_folder_name = False
     elif prefix_choice.startswith("4 "):
         profile_name = prefix_choice[2:]
         prefix = load_profile(profile_name)
         move_files = False
+        add_folder_name = False
     elif prefix_choice == "5":
         prefix = input("Enter prefix to add to the beginning of each line: ")
+        add_folder_name_choice = input("Do you want to add the folder name to the prefix path? (Y/N): ").lower()
+        add_folder_name = add_folder_name_choice == "y"
         move_files = True
     else:
         prefix = ""
         move_files = False
+        add_folder_name = False
 
     if move_files:
-        move_files_and_generate_m3u(directory, files_by_base, prefix)
+        move_files_and_generate_m3u(directory, files_by_base, prefix, add_folder_name)
     else:
         for base_name, filenames in files_by_base.items():
             m3u_name = f"{base_name}.m3u"
