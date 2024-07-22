@@ -1,6 +1,13 @@
 import os
 import json
+import re
 from tkinter import Tk, Button, filedialog, Label, messagebox
+
+def sanitize_filename(name):
+    # Replace colon with ' - '
+    name = name.replace(':', ' - ')
+    # Remove any other illegal characters
+    return re.sub(r'[<>:"/\\|?*]', '', name)
 
 def parse_ini_file(ini_file_path):
     app_data = {}
@@ -37,7 +44,8 @@ def create_daijishou_files(ini_file_path):
 
     for app_name, data in app_data.items():
         if 'id' in data and data['id']:
-            moonlight_filename = os.path.join(save_folder, f"{app_name}.moonlight")
+            sanitized_name = sanitize_filename(app_name)
+            moonlight_filename = os.path.join(save_folder, f"{sanitized_name}.moonlight")
             content = f"# Daijishou Player Template\n[moonlight_id] {data['id']}\n..."
             
             with open(moonlight_filename, 'w') as moonlight_file:
@@ -94,7 +102,8 @@ def create_esde_files(ini_file_path):
 
     for app_name, data in app_data.items():
         if 'id' in data and data['id']:
-            moonlight_filename = os.path.join(save_folder, f"{app_name}.moonlight")
+            sanitized_name = sanitize_filename(app_name)
+            moonlight_filename = os.path.join(save_folder, f"{sanitized_name}.moonlight")
             content = f"{data['id']}"
             
             with open(moonlight_filename, 'w') as moonlight_file:
@@ -108,6 +117,38 @@ def create_esde_files(ini_file_path):
             uuid_file.write(moonlight_uuid)
 
         print(f"Created {uuid_filename}")
+
+        es_systems_content = """<systemList>
+    <system>
+        <name>moonlight</name>
+        <fullname>Moonlight Game Streaming</fullname>
+        <path>%ROMPATH%/moonlight</path>
+        <extension>.moonlight</extension>
+        <command label="Moonlight">%EMULATOR_Moonlight% %EXTRA_UUID%=%INJECT%=Moonlight.uuid %EXTRA_AppId%=%INJECT%=%BASENAME%.moonlight</command>
+        <platform>moonlight</platform>
+        <theme>moonlight</theme>
+    </system>
+</systemList>"""
+
+        es_find_rules_content = """<ruleList>
+    <emulator name="Moonlight">
+        <rule type="androidpackage">
+            <entry>com.limelight/com.limelight.ShortcutTrampoline</entry>
+        </rule>
+    </emulator>
+</ruleList>"""
+
+        es_systems_filename = os.path.join(save_folder, "es_systems.xml")
+        with open(es_systems_filename, 'w') as es_systems_file:
+            es_systems_file.write(es_systems_content)
+
+        print(f"Created {es_systems_filename}")
+
+        es_find_rules_filename = os.path.join(save_folder, "es_find_rules.xml")
+        with open(es_find_rules_filename, 'w') as es_find_rules_file:
+            es_find_rules_file.write(es_find_rules_content)
+
+        print(f"Created {es_find_rules_filename}")
 
     messagebox.showinfo("ESDE Files", "ES-DE moonlight files created successfully.")
 
