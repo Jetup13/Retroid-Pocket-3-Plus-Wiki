@@ -18829,6 +18829,11 @@
 </game>
 
 <game>
+	name "Flight of the Amazon Queen (CD) (DOS) (English)"
+	code "queen-fallback"
+</game>
+
+<game>
 	name "Flight of the Amazon Queen (Floppy) (Amiga)"
 	code "queen-amiga"
 </game>
