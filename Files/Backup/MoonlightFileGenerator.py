@@ -56,7 +56,7 @@ def create_daijishou_files(ini_file_path):
     if moonlight_uuid:
         moonlight_json_content = {
             "databaseVersion": 14,
-            "revisionNumber": 2,
+            "revisionNumber": 3,
             "platform": {
                 "name": "Moonlight Streaming",
                 "uniqueId": "moonlight",
@@ -80,6 +80,16 @@ def create_daijishou_files(ini_file_path):
                     "description": "Supported extensions: moonlight",
                     "acceptedFilenameRegex": "^(.*)\\.(?:moonlight)$",
                     "amStartArguments": f"-n com.limelight/com.limelight.ShortcutTrampoline\n --es UUID {moonlight_uuid}\n --es AppId {{tags.moonlight_id}}",
+                    "killPackageProcesses": True,
+                    "killPackageProcessesWarning": True,
+                    "extra": ""
+                },
+                {
+                    "name": "artemis",
+                    "uniqueId": "moonlight.com.limelight.noir",
+                    "description": "Supported extensions: moonlight",
+                    "acceptedFilenameRegex": "^(.*)\\.(?:moonlight)$",
+                    "amStartArguments": f"-n com.limelight.noir/com.limelight.ShortcutTrampoline\n --es UUID {moonlight_uuid}\n --es AppId {{tags.moonlight_id}}",
                     "killPackageProcesses": True,
                     "killPackageProcessesWarning": True,
                     "extra": ""
@@ -125,6 +135,7 @@ def create_esde_files(ini_file_path):
         <path>%ROMPATH%/moonlight</path>
         <extension>.moonlight</extension>
         <command label="Moonlight">%EMULATOR_Moonlight% %EXTRA_UUID%=%INJECT%=Moonlight.uuid %EXTRA_AppId%=%INJECT%=%BASENAME%.moonlight</command>
+        <command label="Artemis">%EMULATOR_Artemis% %EXTRA_UUID%=%INJECT%=Moonlight.uuid %EXTRA_AppId%=%INJECT%=%BASENAME%.moonlight</command>
         <platform>moonlight</platform>
         <theme>moonlight</theme>
     </system>
@@ -134,6 +145,11 @@ def create_esde_files(ini_file_path):
     <emulator name="Moonlight">
         <rule type="androidpackage">
             <entry>com.limelight/com.limelight.ShortcutTrampoline</entry>
+        </rule>
+    </emulator>
+    <emulator name="Artemis">
+        <rule type="androidpackage">
+            <entry>com.limelight.noir/com.limelight.ShortcutTrampoline</entry>
         </rule>
     </emulator>
 </ruleList>"""
